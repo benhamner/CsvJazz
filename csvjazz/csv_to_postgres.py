@@ -4,26 +4,30 @@ import os
 
 def get_postgres_type(s):
     if s=="str":
-        return "character varying"
+        return "CHARACTER VARYING"
     if s=="int":
-        return "bigint"
+        return "BIGINT"
     if s=="float":
-        return "double precision"
+        return "DOUBLE PRECISION"
     if s=="datetime":
-        return "timestamp with time zone"
+        return "TIMESTAMP WITH TIME ZONE"
 
-def make_postgres_script(csv_path, table_name):
+def make_postgres_schema(csv_path, table_name):
     reader = csv.reader(open(csv_path))
     columns = reader.next()
-    types = [detect_types.detect_type(s) for s in reader.next()]
+    try:
+        types = [detect_types.detect_type(s) for s in reader.next()]
+    except StopIteration:
+        types = ["str" for s in columns]
     script_rows = ["CREATE TABLE %s (" % table_name]
     for col, t in zip(columns, types):
         script_rows.append("    %s %s," % (col, get_postgres_type(t)))
     script_rows[-1] = script_rows[-1][:-1] + ");"
-    script_rows.append("")
-    script_rows.append("COPY %s FROM '%s' DELIMITERS ',' CSV;" % (table_name, csv_path))
 
     return "\n".join(script_rows)
+
+def make_postgres_ingest(csv_path, table_name):
+    return "COPY %s FROM '%s' DELIMITERS ',' CSV HEADER;" % (table_name, csv_path)
 
 if __name__=="__main__":
     import os

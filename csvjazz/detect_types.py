@@ -1,5 +1,5 @@
 import csv
-from dateutil.parser import parse
+from datetime import datetime
 
 def detect_type(s):
     try:
@@ -15,7 +15,7 @@ def detect_type(s):
         pass
 
     try:
-        parse(s)
+        datetime.strptime(s[:19], "%Y-%m-%d %H:%M:%S")
         return "datetime"
     except ValueError:
         pass

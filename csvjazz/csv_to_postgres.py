@@ -41,7 +41,7 @@ def make_postgres_ingest_with_defaults(csv_path, table_name, cur):
     cur.execute(column_names_no_defaults_query)
     column_names = [x[0] for x in cur.fetchall()]
 
-    return "COPY %s (%s) FROM '%s' DELIMITERS ',' CSV HEADER;" % (table_name, column_names,csv_path)
+    return "COPY %s (%s) FROM '%s' DELIMITERS ',' CSV HEADER;" % (table_name, ",".join(column_names),csv_path)
     
 if __name__=="__main__":
     import os

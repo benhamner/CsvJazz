@@ -1,6 +1,7 @@
 import csv
 import detect_types
 import os
+import psycopg2
 
 def get_postgres_type(s):
     if s=="str":
@@ -29,6 +30,19 @@ def make_postgres_schema(csv_path, table_name):
 def make_postgres_ingest(csv_path, table_name):
     return "COPY %s FROM '%s' DELIMITERS ',' CSV HEADER;" % (table_name, csv_path)
 
+def make_postgres_ingest_with_defaults(csv_path, table_name, cur):
+    column_names_no_defaults_query = """
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = '%s'
+          AND column_default IS NULL
+        ORDER BY ordinal_position
+    """ % table_name
+    cur.execute(column_names_no_defaults_query)
+    column_names = [x[0] for x in cur.fetchall()]
+
+    return "COPY %s (%s) FROM '%s' DELIMITERS ',' CSV HEADER;" % (table_name, column_names,csv_path)
+    
 if __name__=="__main__":
     import os
 
